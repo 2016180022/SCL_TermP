@@ -100,10 +100,11 @@ class DSG:
 		self.charIdLst = []
 		self.charNameLst = []
 		self.serverIdLst = []
+		self.charLstCounts = len(jsonData['rows'])
 
 		index = 0
-		Object
-		for i in range(5):
+
+		for i in range(self.charLstCounts):
 			self.charIdLst.append(jsonData['rows'][i]['characterId'])
 			self.charNameLst.append(jsonData['rows'][i]['characterName'])
 			self.serverIdLst.append(jsonData['rows'][i]['serverId'])
@@ -114,8 +115,10 @@ class DSG:
 		for index in range(len(self.charIdLst)):
 			self.getCharImage(self.serverIdLst[index], self.charIdLst[index], self.charNameLst[index])
 
+		self.printCharImage()
+
 	def getCharImage(self, serverId, charId, charName, size = 12):
-		url = 'https://img-api.neople.co.kr/df/servers/' + serverId + '/characters/' + charId + '?zoom=' + str(size)
+		url = 'https://img-api.neople.co.kr/df/servers/' + serverId + '/characters/' + charId + '?zoom=1' + str(size)
 		outpath = 'images/'
 		outfile = 'image_' + serverId + '_' + charName + '.png'
 
@@ -123,6 +126,21 @@ class DSG:
 			os.makedirs(outpath)
 
 		urllib.request.urlretrieve(url, outpath + outfile)
+
+	def printCharImage(self):
+		imageLst = []
+		for i in range(self.charLstCounts):
+			imageLst.append(PhotoImage(file = 'images/image_' + self.serverIdLst[i] + '_' + self.charNameLst[i] + '.png'))
+
+		buttonLst = []
+		for i in range(self.charLstCounts):
+			buttonLst.append(Button(self.board, image = imageLst[i], command = self.selectChar))
+			buttonLst[i].pack()
+		# 	#buttonLst[i].place(x = )
+
+	def selectChar(self):
+		pass
+
 
 demo = DSG()
 
