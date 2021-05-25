@@ -118,7 +118,7 @@ class DSG:
 		self.printCharImage()
 
 	def getCharImage(self, serverId, charId, charName, size = 12):
-		url = 'https://img-api.neople.co.kr/df/servers/' + serverId + '/characters/' + charId + '?zoom=1' + str(size)
+		url = 'https://img-api.neople.co.kr/df/servers/' + serverId + '/characters/' + charId + '?zoom=' + str(size)
 		outpath = 'images/'
 		outfile = 'image_' + serverId + '_' + charName + '.png'
 
@@ -134,7 +134,8 @@ class DSG:
 
 		buttonLst = []
 		for i in range(self.charLstCounts):
-			buttonLst.append(Button(self.board, image = imageLst[i], command = self.selectChar))
+			buttonLst.append(Button(self.board, image = imageLst[i], bg = 'white', command = self.selectChar))
+			buttonLst[i].image = imageLst[i]
 			buttonLst[i].pack()
 		# 	#buttonLst[i].place(x = )
 
