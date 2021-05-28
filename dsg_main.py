@@ -322,7 +322,7 @@ class DSG:
 
 	def infoCheck(self, index):
 		itemId = self.infoIdLst[index]
-		conn.request('GET', '/df/auction?itemId=' + itemId + '&sort=unitPrice:asc,reinforce:<reinforce>,auctionNo:<auctionNo>&limit=5&apikey=' + apikey)
+		conn.request('GET', '/df/auction?itemId=' + itemId + '&sort=unitPrice:asc,reinforce:<reinforce>,auctionNo:<auctionNo>&limit=3&apikey=' + apikey)
 		response = conn.getresponse()
 		cLen = response.getheader('Content-Length')
 		result = response.read(int(cLen)).decode('UTF-8')
@@ -332,18 +332,37 @@ class DSG:
 		for i in range(len(Info['rows'])):
 			self.unitPrice.append(Info['rows'][i]['currentPrice'])
 
-		if self.labelcheck == 0:
+		self.getItemImage(itemId)
+
+		self.itemImage = PhotoImage(file = 'images/image_item_' + itemId + '.png')
+
+		if self.labelCheck == 0:
+			self.cfImageLabelLst = []
+			self.cfPriceLabelLst = []
 			self.warningLabel = Label(self.board, text = '', font = self.charFont)
-			self.labelcheck += 1
+			for i in range(3):
+				self.cfImageLabelLst.append(Label(self.board))
+				self.cfPriceLabelLst.append(Label(self.board, text = ''))
+			self.labelCheck += 1
 
 		if self.unitPrice != []:
 			self.printItemInfo(index)
 		else:
 			self.printItemInfo(-1)
-			
+
+	def getItemImage(self, itemId):
+		'https://img-api.neople.co.kr/df/items/<itemId>'
+		url = 'https://img-api.neople.co.kr/df/items/' + itemId
+		outpath = 'images/'
+		outfile = 'image_item_' + itemId + '.png'
+
+		if not os.path.isdir(outpath):
+			os.makedirs(outpath)
+
+		urllib.request.urlretrieve(url, outpath + outfile)
+
 	def printItemInfo(self, index):
 		if index == -1:
-			print('아이템 탐색 오류')
 			self.warningLabel.configure(text = '아이템을 찾을 수 없습니다')
 			self.warningLabel.place(x = 50, y = 400)
 			if self.cfNameLabel['text'] != '':
@@ -355,22 +374,34 @@ class DSG:
 				self.cfNameLabel.place(x = 50, y = 400)
 				self.cfLabel = Label(self.board, text = '경매장 최저가')
 				self.cfLabel.place(x = 50, y = 420)
-				self.cfPriceLabel = Label(self.board, text = str(self.unitPrice[0]) + '골드')
-				self.cfPriceLabel.place(x = 50, y = 438)
+				self.cfPriceLabel = Label(self.board, text = str(self.unitPrice[0]) + '골드', font = self.charFont)
+				self.cfPriceLabel.place(x = 50, y = 445)
+				self.cfAuctionTitleLabel = Label(self.board, text = '매물 현황', font = self.charFont)
+				self.cfAuctionTitleLabel.place(x = 410, y = 400)
+				for i in range(len(self.unitPrice)):
+					self.cfImageLabelLst[i].configure(image = self.itemImage)
+					self.cfImageLabelLst[i].place(x = 380, y = 440 + i * 40)
+					self.cfPriceLabelLst[i].configure(text = str(self.unitPrice[i]) + '골드')
+					self.cfPriceLabelLst[i].place(x = 430, y = 445 + i * 40)
 			else:
 				self.cfNameLabel.configure(text = self.infoNameLst[index])
 				self.cfLabel.configure(text = '경매장 최저가')
 				self.cfPriceLabel.configure(text = str(self.unitPrice[0]) + '골드')
+				for i in range(len(self.unitPrice)):
+					self.cfImageLabelLst[i].configure(image = self.itemImage)
+					self.cfPriceLabelLst[i].configure(text = str(self.unitPrice[i]) + '골드')
 
 	def delItemInfo(self, ftype = 0):
 		if ftype == 0:
 			self.cfNameLabel.configure(text = '')
 			self.cfLabel.configure(text = '')
 			self.cfPriceLabel.configure(text = '')
+			self.cfAuctionTitleLabel.configure(text = '')
+			for i in range(3):
+				self.cfImageLabelLst[i].configure(image = '')
+				self.cfPriceLabelLst[i].configure(text = '')
 		elif ftype == -1:
-			print('텍스트 초기화 실행')
 			self.warningLabel.configure(text = '')
-			self.warningLabel.place(x = 50, y = 400)
 
 demo = DSG()
 
