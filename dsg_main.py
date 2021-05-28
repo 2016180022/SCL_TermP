@@ -24,6 +24,8 @@ class DSG:
 		self.charFont = tkfont.Font(family = 'D2coding', size = 12)
 		self.serverId = ''
 		self.charName = ''
+		self.charLstCounts = 0
+		self.labelCheck = 0
 		self.initUpperFrame()
 
 		self.board.mainloop()
@@ -64,7 +66,17 @@ class DSG:
 		initialLabel.pack()
 		initialLabel.place(x = 160, y = 200)
 
+	def delSearchUI(self, charCounts):
+
+		for i in range(charCounts):
+			buttonLst[i].destroy()
+			textLst[i].destroy()
+			serverLst[i].destroy()
+
 	def searchChar(self):
+		if self.charLstCounts > 0:
+			self.delSearchUI(self.charLstCounts)
+
 		self.charName = charNameEntry.get()
 		charName = self.charName
 
@@ -97,9 +109,9 @@ class DSG:
 			self.serverId = 'bakal'
 		
 		charName = urllib.parse.quote(str(charName).encode('UTF-8'))
-		conn.request('GET', '/df/servers/' + self.serverId + '/characters?characterName=' + charName + '&wordType=full&apikey=' + apikey)
 		header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
-
+		conn.request('GET', '/df/servers/' + self.serverId + '/characters?characterName=' + charName + '&wordType=full&apikey=' + apikey, headers = header)
+		
 		response = conn.getresponse()
 		cLen = response.getheader('Content-Length')
 		result = response.read(int(cLen)).decode('UTF-8')
@@ -200,6 +212,8 @@ class DSG:
 		self.serverId = self.serverIdLst[index]
 		self.charImage = self.imageLst[index]
 
+		self.delSearchUI(self.charLstCounts)
+
 		if self.serverIdLst[index] == 'cain':
 			self.serverName = '카인'
 		elif self.serverIdLst[index] == 'bakal':
@@ -217,18 +231,10 @@ class DSG:
 		elif self.serverIdLst[index] == 'siroco':
 			self.serverName = '시로코'
 
-		self.charIdLst.clear()
-		self.charNameLst.clear()
-		self.serverIdLst.clear()
-
-		for i in range(self.charLstCounts):
-			buttonLst[i].destroy()
-			textLst[i].destroy()
-			serverLst[i].destroy()
-
 		self.printCharInfo()
 
 	def printCharInfo(self):
+		global charImageLabel, charServerLabel, charNameLabel
 		charImageLabel = Label(self.board, image = self.charImage)
 		charImageLabel.pack()
 		charImageLabel.place(x = 25, y = 100)
@@ -239,9 +245,10 @@ class DSG:
 		charServerLabel.pack()
 		charServerLabel.place(x = 50, y = 340)
 
+		global infoNameLabelLst, infoItemButtonLst, infoCheckLst
 		infoNameLabelLst = []
 		infoNameLst = ['모자', '머리', '얼굴', '상의', '하의', '신발', '목가슴', '허리', '피부', '무기']
-		infoItemLabelLst = []
+		infoItemButtonLst = []
 		infoCheckLst = []
 
 		self.getCharInfo()
@@ -252,12 +259,20 @@ class DSG:
 			infoNameLabelLst.append(Label(self.board, text = infoNameLst[i], font = self.charFont))
 			infoNameLabelLst[i].pack()
 			infoNameLabelLst[i].place(x = x, y = y)
-			infoItemLabelLst.append(Label(self.board, text = self.infoNameLst[i]))
-			infoItemLabelLst[i].pack()
-			infoItemLabelLst[i].place(x = x + 60, y = y + 2)
+			infoItemButtonLst.append(Button(self.board, text = self.infoNameLst[i], command = lambda index = i : self.infoCheck(index)))
+			infoItemButtonLst[i].pack()
+			infoItemButtonLst[i].place(x = x + 60, y = y + 2)
 			infoCheckLst.append(Checkbutton(self.board, command = lambda index = i : self.infoCheck(index)))
 			infoCheckLst[i].pack()
 			infoCheckLst[i].place(x = x + 300, y = y + 1)
+
+		self.cfNameLabel = Label(self.board, text = '', font = self.charFont)
+
+	def delCharInfo(self):
+		for i in range(len(infoNameLst)):
+			infoNameLabelLst[i].destroy()
+			infoItemButtonLst[i].destroy()
+			infoCheckLst[i].destroy()
 
 	def getCharInfo(self):
 		conn.request('GET', '/df/servers/' + self.serverId + '/characters/' + self.charId + '/equip/avatar?apikey=' + apikey)
@@ -266,8 +281,6 @@ class DSG:
 		result = response.read(int(cLen)).decode('UTF-8')
 
 		Info = json.loads(result)
-
-		print(Info)
 
 		self.infoIdLst = []
 		self.infoNameLst = []
@@ -278,12 +291,16 @@ class DSG:
 			#print(self.infoIdLst[index], self.infoNameLst[index])
 		self.infoIdLst.append(Info['avatar'][8]['itemId'])
 		self.infoNameLst.append(Info['avatar'][8]['itemName'])
-		if 'clone' in Info['avatar'][10]:
-			self.infoIdLst.append(Info['avatar'][10]['clone']['itemId'])
-			self.infoNameLst.append(Info['avatar'][10]['clone']['itemName'])
+		if len(Info['avatar']) > 10:
+			if 'clone' in Info['avatar'][10]:
+				self.infoIdLst.append(Info['avatar'][10]['clone']['itemId'])
+				self.infoNameLst.append(Info['avatar'][10]['clone']['itemName'])
+			else:
+				self.infoIdLst.append(Info['avatar'][10]['itemId'])
+				self.infoNameLst.append(Info['avatar'][10]['itemName'])
 		else:
-			self.infoIdLst.append(Info['avatar'][10]['itemId'])
-			self.infoNameLst.append(Info['avatar'][10]['itemName'])
+			self.infoIdLst.append('None')
+			self.infoNameLst.append('None')
 
 		self.getWeaponInfo()
 
@@ -296,16 +313,64 @@ class DSG:
 		Info = json.loads(result)
 
 		if 'skin' in Info['equipment'][0]:
-			self.infoIdLst[9] = Info['equipment'][0]['skin']['itemId']
-			self.infoNameLst[9] = Info['equipment'][0]['skin']['itemName']
+			self.infoIdLst[-1] = Info['equipment'][0]['skin']['itemId']
+			self.infoNameLst[-1] = Info['equipment'][0]['skin']['itemName']
 		else:
-			if self.infoIdLst[9] == None:
-				self.infoIdLst[9] = Info['equipment'][0]['itemId']
-				self.infoNameLst[9] = Info['equipment'][0]['itemName']
+			if self.infoIdLst[-1] == None:
+				self.infoIdLst[-1] = Info['equipment'][0]['itemId']
+				self.infoNameLst[-1] = Info['equipment'][0]['itemName']
 
 	def infoCheck(self, index):
-		pass
+		itemId = self.infoIdLst[index]
+		conn.request('GET', '/df/auction?itemId=' + itemId + '&sort=unitPrice:asc,reinforce:<reinforce>,auctionNo:<auctionNo>&limit=5&apikey=' + apikey)
+		response = conn.getresponse()
+		cLen = response.getheader('Content-Length')
+		result = response.read(int(cLen)).decode('UTF-8')
 
+		Info = json.loads(result)
+		self.unitPrice = []
+		for i in range(len(Info['rows'])):
+			self.unitPrice.append(Info['rows'][i]['currentPrice'])
+
+		if self.labelcheck == 0:
+			self.warningLabel = Label(self.board, text = '', font = self.charFont)
+			self.labelcheck += 1
+
+		if self.unitPrice != []:
+			self.printItemInfo(index)
+		else:
+			self.printItemInfo(-1)
+			
+	def printItemInfo(self, index):
+		if index == -1:
+			print('아이템 탐색 오류')
+			self.warningLabel.configure(text = '아이템을 찾을 수 없습니다')
+			self.warningLabel.place(x = 50, y = 400)
+			if self.cfNameLabel['text'] != '':
+				self.delItemInfo()
+		else:
+			self.delItemInfo(-1)
+			if self.cfNameLabel['text'] == '':
+				self.cfNameLabel.configure(text = self.infoNameLst[index])
+				self.cfNameLabel.place(x = 50, y = 400)
+				self.cfLabel = Label(self.board, text = '경매장 최저가')
+				self.cfLabel.place(x = 50, y = 420)
+				self.cfPriceLabel = Label(self.board, text = str(self.unitPrice[0]) + '골드')
+				self.cfPriceLabel.place(x = 50, y = 438)
+			else:
+				self.cfNameLabel.configure(text = self.infoNameLst[index])
+				self.cfLabel.configure(text = '경매장 최저가')
+				self.cfPriceLabel.configure(text = str(self.unitPrice[0]) + '골드')
+
+	def delItemInfo(self, ftype = 0):
+		if ftype == 0:
+			self.cfNameLabel.configure(text = '')
+			self.cfLabel.configure(text = '')
+			self.cfPriceLabel.configure(text = '')
+		elif ftype == -1:
+			print('텍스트 초기화 실행')
+			self.warningLabel.configure(text = '')
+			self.warningLabel.place(x = 50, y = 400)
 
 demo = DSG()
 
