@@ -245,15 +245,17 @@ class DSG:
 		charServerLabel.pack()
 		charServerLabel.place(x = 50, y = 340)
 
-		global infoNameLabelLst, infoItemButtonLst, infoCheckLst
+		global infoNameLabelLst, infoNameLst, infoItemButtonLst, infoCheckLst
 		infoNameLabelLst = []
 		infoNameLst = ['모자', '머리', '얼굴', '상의', '하의', '신발', '목가슴', '허리', '피부', '무기']
 		infoItemButtonLst = []
-		infoCheckLst = []
+		self.infoCheckLst = []
 
 		self.getCharInfo()
 
+		self.isCheckLst = []
 		for i in range(10):
+			self.isCheckLst.append(IntVar())
 			x = 200
 			y = 80 + i * 30
 			infoNameLabelLst.append(Label(self.board, text = infoNameLst[i], font = self.charFont))
@@ -262,17 +264,28 @@ class DSG:
 			infoItemButtonLst.append(Button(self.board, text = self.infoNameLst[i], command = lambda index = i : self.infoCheck(index)))
 			infoItemButtonLst[i].pack()
 			infoItemButtonLst[i].place(x = x + 60, y = y + 2)
-			infoCheckLst.append(Checkbutton(self.board, command = lambda index = i : self.infoCheck(index)))
-			infoCheckLst[i].pack()
-			infoCheckLst[i].place(x = x + 300, y = y + 1)
+			self.infoCheckLst.append(Checkbutton(self.board, variable = self.isCheckLst[i]))
+			self.infoCheckLst[i].pack()
+			self.infoCheckLst[i].place(x = x + 300, y = y + 1)
 
 		self.cfNameLabel = Label(self.board, text = '', font = self.charFont)
+		self.dictItem = {}
+		self.bucketNameLabel = Label(self.board, text = '총 아바타 구매 가격', font = self.charFont)
+		self.bucketNameLabel.place(x = 50, y = 500)
+		self.bucketListLabel = Label(self.board, text = '', font = self.charFont)
+		self.bucketListLabel.place(x = 50, y = 520)
+		self.bucketAddbutton = Button(self.board, text = '장바구니 추가', command = self.checkBucketList)
+		self.bucketAddbutton.place(x = 50, y = 550)
+
+		self.graphTitleLabel = Label(self.board, text = '경매장 시세', font = self.charFont)
+		self.graphTitleLabel.place(x = 400, y = 560)
+
 
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
 			infoNameLabelLst[i].destroy()
 			infoItemButtonLst[i].destroy()
-			infoCheckLst[i].destroy()
+			self.infoCheckLst[i].destroy()
 
 	def getCharInfo(self):
 		conn.request('GET', '/df/servers/' + self.serverId + '/characters/' + self.charId + '/equip/avatar?apikey=' + apikey)
@@ -332,7 +345,14 @@ class DSG:
 		for i in range(len(Info['rows'])):
 			self.unitPrice.append(Info['rows'][i]['currentPrice'])
 
+		if self.unitPrice == []:
+			self.dictItem[self.infoNameLst[index]] = 0
+		else:
+			self.dictItem[self.infoNameLst[index]] = self.unitPrice[0]
+		self.bucketListPrice = 0
+
 		self.getItemImage(itemId)
+		self.getMarketPrice(itemId)
 
 		self.itemImage = PhotoImage(file = 'images/image_item_' + itemId + '.png')
 
@@ -347,6 +367,7 @@ class DSG:
 
 		if self.unitPrice != []:
 			self.printItemInfo(index)
+			self.drawGraph()
 		else:
 			self.printItemInfo(-1)
 
@@ -402,6 +423,60 @@ class DSG:
 				self.cfPriceLabelLst[i].configure(text = '')
 		elif ftype == -1:
 			self.warningLabel.configure(text = '')
+
+	def checkBucketList(self):
+		for i in range(len(self.infoNameLst)):
+			if self.isCheckLst[i].get() == 1:
+				self.bucketListPrice += self.dictItem[self.infoNameLst[i]]
+		self.bucketListLabel.configure(text = self.bucketListPrice)
+
+	def drawGraph(self):
+		self.graphCanvas = Canvas(self.board, width= 200, height= 150, bg = 'white')
+		self.graphCanvas.place(x = 350, y = 590)
+		self.graphCanvas.delete('graph')
+		self.graphCanvas.create_line(12, 140, 192, 140, width= 2, tags = 'graph')
+		self.graphCanvas.create_line(12, 10, 12, 140, width= 2, tags = 'graph')
+
+		p = []
+		pp = []
+		y = []
+		for i in range(len(self.marketPrice)):
+			p.append(self.marketPrice[i] / 10000)
+		for i in range(len(p)):
+			pp.append(p[i] - min(p))
+		
+		if (max(pp) < 150):
+			for i in range(len(pp)):
+				y.append(pp[i])
+		else:
+			rate = max(pp) // 100
+			for i in range(len(pp)):
+				y.append(pp[i] // rate)
+
+		print(y)
+
+		if (len(y)) > 2:
+			self.graphCanvas.create_line(12 + 45, 130 - y[0], 12 + 45 + 45, 130 - y[1], width = 2, tags = 'graph', fill = 'red')
+		if (len(y)) > 3:
+			self.graphCanvas.create_line(12 + 45 + 45, 130 - y[1], 12 + 45 + 45 + 45, 130 - y[2], width = 2, tags = 'graph', fill = 'red')
+			self.graphCanvas.create_line(12 + 45 + 45 + 45, 130 - y[2], 12 + 45 + 45 + 45 + 45, 130 - y[3], width = 2, tags = 'graph', fill = 'red')
+		self.graphCanvas.create_text(12 + 30, 130 - min(y), text = min(self.marketPrice), tags = 'graph')
+		self.graphCanvas.create_text(12 + 30, 130 - max(y), text = max(self.marketPrice), tags = 'graph')
+		
+	def getMarketPrice(self, itemId):
+		conn.request('GET', '/df/auction-sold?itemId=' + itemId + '&limit=4&apikey=' + apikey)
+		response = conn.getresponse()
+		cLen = response.getheader('Content-Length')
+		result = response.read(int(cLen)).decode('UTF-8')
+
+		Info = json.loads(result)
+
+		self.marketPrice = []
+		
+		for i in range(len(Info['rows'])):
+			self.marketPrice.append(Info['rows'][i]['unitPrice'])
+		
+		
 
 demo = DSG()
 
