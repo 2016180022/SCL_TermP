@@ -372,7 +372,7 @@ class DSG:
 			self.printItemInfo(-1)
 
 	def getItemImage(self, itemId):
-		'https://img-api.neople.co.kr/df/items/<itemId>'
+		#'https://img-api.neople.co.kr/df/items/<itemId>'
 		url = 'https://img-api.neople.co.kr/df/items/' + itemId
 		outpath = 'images/'
 		outfile = 'image_item_' + itemId + '.png'
