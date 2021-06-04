@@ -13,6 +13,7 @@ import os
 server = 'api.neople.co.kr'
 apikey = 'rDbaGyKaYdUlFoFDidXiyOoeMB0mrR5M'
 conn = http.client.HTTPSConnection(server)
+header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
 
 class DSG:
 
@@ -109,8 +110,7 @@ class DSG:
 			self.serverId = 'bakal'
 		
 		charName = urllib.parse.quote(str(charName).encode('UTF-8'))
-		header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'}
-		conn.request('GET', '/df/servers/' + self.serverId + '/characters?characterName=' + charName + '&wordType=full&apikey=' + apikey, headers = header)
+		conn.request('GET', '/df/servers/' + self.serverId + '/characters?characterName=' + charName + '&wordType=full&apikey=' + apikey, None, header)
 		
 		response = conn.getresponse()
 		cLen = response.getheader('Content-Length')
@@ -280,8 +280,8 @@ class DSG:
 		self.graphTitleLabel = Label(self.board, text = '경매장 시세', font = self.charFont)
 		self.graphTitleLabel.place(x = 400, y = 560)
 
-		# self.gmailButton = Button(self.board, image = 'None', command = self.sendGMail)
-		# self.gmailButton.place(x = 50, y = 600)
+		self.gmailButton = Button(self.board, text = 'Gmail보내기', command = self.sendGMail)
+		self.gmailButton.place(x = 50, y = 600)
 
 
 	def delCharInfo(self):
@@ -479,7 +479,47 @@ class DSG:
 		for i in range(len(Info['rows'])):
 			self.marketPrice.append(Info['rows'][i]['unitPrice'])
 		
-		
+	def sendGMail(self):
+		import mimetypes
+		import mysmtplib
+		from email.mime.base import MIMEBase
+		from email.mime.text import MIMEText
+
+		#global value
+		host = "smtp.gmail.com" # Gmail STMP 서버 주소.
+		port = "587"
+
+		senderAddr = "hozkiharu@gmail.com"     # 보내는 사람 email 주소.
+		recipientAddr = "vjsl159@gmail.com"   # 받는 사람 email 주소.
+
+		msg = MIMEBase("multipart", "alternative")
+		msg['Subject'] = "DSG 영수증 알림"
+		msg['From'] = senderAddr
+		msg['To'] = recipientAddr
+
+		#장바구니 불러오기
+		namelst = list(self.dictItem.keys())
+		pricelst = list(self.dictItem.values())
+		text = ''
+		for i in range(len(self.infoNameLst)):
+			if self.isCheckLst[i].get() == 1:
+				text += namelst[i] + ': ' + str(pricelst[i]) + '골드\n'
+
+		# MIME 문서를 생성합니다.
+		HtmlPart = MIMEText(text, 'plain', _charset = 'UTF-8' )
+
+		# 만들었던 mime을 MIMEBase에 첨부 시킨다.
+		msg.attach(HtmlPart)
+
+		# 메일을 발송한다.
+		s = mysmtplib.MySMTP(host,port)
+		#s.set_debuglevel(1)        # 디버깅이 필요할 경우 주석을 푼다.
+		s.ehlo()
+		s.starttls()
+		s.ehlo()
+		s.login("hozkiharu@gmail.com","sldkzk89rs")
+		s.sendmail(senderAddr , [recipientAddr], msg.as_string())
+		s.close()
 
 demo = DSG()
 
