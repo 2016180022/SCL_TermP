@@ -280,6 +280,9 @@ class DSG:
 		self.graphTitleLabel = Label(self.board, text = '경매장 시세', font = self.charFont)
 		self.graphTitleLabel.place(x = 400, y = 560)
 
+		# self.gmailButton = Button(self.board, image = 'None', command = self.sendGMail)
+		# self.gmailButton.place(x = 50, y = 600)
+
 
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
@@ -372,7 +375,7 @@ class DSG:
 			self.printItemInfo(-1)
 
 	def getItemImage(self, itemId):
-		#'https://img-api.neople.co.kr/df/items/<itemId>'
+		'https://img-api.neople.co.kr/df/items/<itemId>'
 		url = 'https://img-api.neople.co.kr/df/items/' + itemId
 		outpath = 'images/'
 		outfile = 'image_item_' + itemId + '.png'
