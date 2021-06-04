@@ -489,7 +489,7 @@ class DSG:
 		host = "smtp.gmail.com" # Gmail STMP 서버 주소.
 		port = "587"
 
-		senderAddr = "hozkiharu@gmail.com"     # 보내는 사람 email 주소.
+		senderAddr = "dsg.depart@gmail.com"     # 보내는 사람 email 주소.
 		recipientAddr = "vjsl159@gmail.com"   # 받는 사람 email 주소.
 
 		msg = MIMEBase("multipart", "alternative")
@@ -517,7 +517,7 @@ class DSG:
 		s.ehlo()
 		s.starttls()
 		s.ehlo()
-		s.login("hozkiharu@gmail.com","sldkzk89rs")
+		s.login("dsg.depart@gmail.com","dsg.depart.program")
 		s.sendmail(senderAddr , [recipientAddr], msg.as_string())
 		s.close()
 
