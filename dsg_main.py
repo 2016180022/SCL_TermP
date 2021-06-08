@@ -10,6 +10,8 @@ import json
 import http.client
 import os
 
+import dsg_teller
+
 server = 'api.neople.co.kr'
 apikey = 'rDbaGyKaYdUlFoFDidXiyOoeMB0mrR5M'
 conn = http.client.HTTPSConnection(server)
