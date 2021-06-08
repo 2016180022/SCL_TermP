@@ -285,6 +285,9 @@ class DSG:
 		self.gmailButton = Button(self.board, text = 'Gmail보내기', command = self.sendGMail)
 		self.gmailButton.place(x = 50, y = 600)
 
+		self.telegramButton = Button(self.board, text = 'Telegram 실행', command = self.turnTelegram)
+		self.telegramButton.place(x = 50, y = 650)
+
 
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
@@ -522,6 +525,9 @@ class DSG:
 		s.login("dsg.depart@gmail.com","dsg.depart.program")
 		s.sendmail(senderAddr , [recipientAddr], msg.as_string())
 		s.close()
+
+	def turnTelegram(self):
+		dsg_teller.run()
 
 demo = DSG()
 
