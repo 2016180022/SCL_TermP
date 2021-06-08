@@ -34,7 +34,6 @@ def getData(itemName):
 
     Info = json.loads(result)
 
-    print(Info)
     unitPrice = {}
     for i in range(len(Info['rows'])):
         key = Info['rows'][i]['itemName']
