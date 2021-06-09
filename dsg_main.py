@@ -291,7 +291,7 @@ class DSG:
 		self.graphTitleLabel.place(x = 400, y = 560)
 
 		image_gmail = PhotoImage(file = 'icon_gmail.png')
-		self.gmailButton = Button(self.board, image = image_gmail, command = self.sendGMail)
+		self.gmailButton = Button(self.board, image = image_gmail, command = self.getMail)
 		self.gmailButton.image = image_gmail
 		self.gmailButton.place(x = 50, y = 590)
 
@@ -508,18 +508,30 @@ class DSG:
 		for i in range(len(Info['rows'])):
 			self.marketPrice.append(Info['rows'][i]['unitPrice'])
 		
+
+	def getMail(self):
+		window = Tk()
+		window.title('Input Mail Address')
+		window.geometry('300x80')
+		Label(window, text = '발송받을 메일 주소를 입력해주세요').pack()
+		self.addEnt = Entry(window, width = 30)
+		self.addEnt.pack()
+		sendButton = Button(window, text = '메일 보내기', command = self.sendGMail)
+		sendButton.place(x = 100, y = 50)
+		
 	def sendGMail(self):
 		import mimetypes
 		import mysmtplib
 		from email.mime.base import MIMEBase
 		from email.mime.text import MIMEText
 
+		gmailAdd = self.addEnt.get()
 		#global value
 		host = "smtp.gmail.com" # Gmail STMP 서버 주소.
 		port = "587"
 
 		senderAddr = "dsg.depart@gmail.com"     # 보내는 사람 email 주소.
-		recipientAddr = "vjsl159@gmail.com"   # 받는 사람 email 주소.
+		recipientAddr = gmailAdd     # 받는 사람 email 주소.
 
 		msg = MIMEBase("multipart", "alternative")
 		msg['Subject'] = "DSG 영수증 알림"
