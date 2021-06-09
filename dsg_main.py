@@ -310,6 +310,11 @@ class DSG:
 		self.showroomButton.image = image_showroom
 		self.showroomButton.place(x = 260, y = 590)
 
+		image_logo = PhotoImage(file = '기술표기_가로형_color.png')
+		self.logoLabel = Label(self.board, image = image_logo)
+		self.logoLabel.image = image_logo
+		self.logoLabel.place(x = 50, y = 690)
+
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
 			infoNameLabelLst[i].destroy()
