@@ -12,6 +12,12 @@ import os
 import dsg_teller
 import grap
 
+import threading
+import sys
+from tkinter import messagebox
+import folium
+from cefpython3 import cefpython as cef
+
 server = 'api.neople.co.kr'
 apikey = 'rDbaGyKaYdUlFoFDidXiyOoeMB0mrR5M'
 conn = http.client.HTTPSConnection(server)
@@ -288,6 +294,11 @@ class DSG:
 		self.telegramButton = Button(self.board, text = 'Telegram 실행', command = self.turnTelegram)
 		self.telegramButton.place(x = 50, y = 650)
 
+		self.mapButton = Button(self. board, text = '지도 열기', command = self.openMap)
+		self.mapButton.place(x = 50, y = 700)
+
+		self.showroomButton = Button(self.board, text = '던파쇼룸 바로가기', command = self.goShowroom)
+		self.showroomButton.place(x = 50, y = 750)
 
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
@@ -527,5 +538,32 @@ class DSG:
 	def turnTelegram(self):
 		dsg_teller.run()
 
+	def showMap(self, frame):
+		sys.excepthook = cef.ExceptHook
+		window_info = cef.WindowInfo(frame.winfo_id())
+		window_info.SetAsChild(frame.winfo_id(), [0,0,800,600])
+		cef.Initialize()
+		browser = cef.CreateBrowserSync(window_info, url='file:///map.html')
+		cef.MessageLoop()
+
+	def openMap(self):
+		window = Tk()
+		frame = Frame(window, width=800, height=600)
+		frame.pack()
+		
+		# 지도 저장
+		m = folium.Map(location=[33.4727133,126.4854080], zoom_start=16)
+		m.save('map.html')
+
+		# 브라우저를 위한 쓰레드 생성
+		thread = threading.Thread(target=self.showMap, args=(frame,))
+		thread.daemon = True
+		thread.start()
+
+		window.mainloop()
+
+	def goShowroom(self):
+		pass
+	
 demo = DSG()
 
