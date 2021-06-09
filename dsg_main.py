@@ -18,6 +18,8 @@ from tkinter import messagebox
 import folium
 from cefpython3 import cefpython as cef
 
+import webbrowser
+
 server = 'api.neople.co.kr'
 apikey = 'rDbaGyKaYdUlFoFDidXiyOoeMB0mrR5M'
 conn = http.client.HTTPSConnection(server)
@@ -563,7 +565,7 @@ class DSG:
 		window.mainloop()
 
 	def goShowroom(self):
-		pass
-	
+		webbrowser.open_new('http://df.nexon.com/df/showroom#/dressroom')
+
 demo = DSG()
 
