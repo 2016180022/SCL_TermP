@@ -1,4 +1,3 @@
-#210521
 #DSG
 
 from tkinter import *
@@ -11,6 +10,7 @@ import http.client
 import os
 
 import dsg_teller
+import grap
 
 server = 'api.neople.co.kr'
 apikey = 'rDbaGyKaYdUlFoFDidXiyOoeMB0mrR5M'
@@ -449,7 +449,7 @@ class DSG:
 		pp = []
 		y = []
 		for i in range(len(self.marketPrice)):
-			p.append(self.marketPrice[i] / 10000)
+			p.append(grap.tdivision(self.marketPrice[i]))
 		for i in range(len(p)):
 			pp.append(p[i] - min(p))
 		
@@ -457,11 +457,9 @@ class DSG:
 			for i in range(len(pp)):
 				y.append(pp[i])
 		else:
-			rate = max(pp) // 100
+			rate = grap.hdivision(max(pp))
 			for i in range(len(pp)):
 				y.append(pp[i] // rate)
-
-		print(y)
 
 		if (len(y)) > 2:
 			self.graphCanvas.create_line(12 + 45, 130 - y[0], 12 + 45 + 45, 130 - y[1], width = 2, tags = 'graph', fill = 'red')
