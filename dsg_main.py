@@ -290,17 +290,25 @@ class DSG:
 		self.graphTitleLabel = Label(self.board, text = '경매장 시세', font = self.charFont)
 		self.graphTitleLabel.place(x = 400, y = 560)
 
-		self.gmailButton = Button(self.board, text = 'Gmail보내기', command = self.sendGMail)
-		self.gmailButton.place(x = 50, y = 600)
+		image_gmail = PhotoImage(file = 'icon_gmail.png')
+		self.gmailButton = Button(self.board, image = image_gmail, command = self.sendGMail)
+		self.gmailButton.image = image_gmail
+		self.gmailButton.place(x = 50, y = 590)
 
-		self.telegramButton = Button(self.board, text = 'Telegram 실행', command = self.turnTelegram)
-		self.telegramButton.place(x = 50, y = 650)
+		image_telegram = PhotoImage(file = 'icon_telegram.png')
+		self.telegramButton = Button(self.board, image = image_telegram, command = self.turnTelegram)
+		self.telegramButton.image = image_telegram
+		self.telegramButton.place(x = 120, y = 590)
 
-		self.mapButton = Button(self. board, text = '지도 열기', command = self.openMap)
-		self.mapButton.place(x = 50, y = 700)
+		image_map = PhotoImage(file = 'icon_map.png')
+		self.mapButton = Button(self. board, image = image_map, command = self.openMap)
+		self.mapButton.image = image_map
+		self.mapButton.place(x = 190, y = 590)
 
-		self.showroomButton = Button(self.board, text = '던파쇼룸 바로가기', command = self.goShowroom)
-		self.showroomButton.place(x = 50, y = 750)
+		image_showroom = PhotoImage(file = 'icon_dnf.png')
+		self.showroomButton = Button(self.board, image = image_showroom, command = self.goShowroom)
+		self.showroomButton.image = image_showroom
+		self.showroomButton.place(x = 260, y = 590)
 
 	def delCharInfo(self):
 		for i in range(len(infoNameLst)):
