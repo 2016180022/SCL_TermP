@@ -563,11 +563,12 @@ class DSG:
 
 	def openMap(self):
 		window = Tk()
+		window.title('Neople 본사 위치')
 		frame = Frame(window, width=800, height=600)
 		frame.pack()
 		
 		# 지도 저장
-		m = folium.Map(location=[33.4727133,126.4854080], zoom_start=16)
+		m = folium.Map(location=[33.4727133,126.4854080], zoom_start=17)
 		m.save('map.html')
 
 		# 브라우저를 위한 쓰레드 생성
